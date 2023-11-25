@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.RoleMapper">
+
+
+    <select id="pageRole" resultType="com.hnkylin.cloud.manage.entity.resp.role.PageRoleRespDto">
+        select cr.id as roleId,cr.role_name as roleName,cr.role_type as roleType,
+        cr.remark as remark,cr.default_role as defaultRole,
+        DATE_FORMAT(cr.create_time,'%Y-%m-%d %H:%i:%S') as createTime
+        from cloud_role cr
+        where cr.delete_flag=false
+    </select>
+
+    <select id="getOrgUserIdList" resultType="java.lang.Integer">
+     select cur.user_id
+     from cloud_user_role cur
+     left join cloud_role cr on cur.role_id=cr.id
+     left join cloud_user cu on cur.user_id=cu.id
+     where cr.role_type=1 and cu.organization_id=#{orgId} and cur.delete_flag=false
+    </select>
+
+</mapper>

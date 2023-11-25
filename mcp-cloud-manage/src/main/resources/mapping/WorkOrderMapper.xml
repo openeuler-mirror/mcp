@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.WorkOrderMapper">
+
+
+    <select id="pageWorkOrder" resultType="com.hnkylin.cloud.manage.entity.resp.workorder.PageWorkOrderRespDto"
+            parameterType="com.hnkylin.cloud.manage.entity.req.workorder.WorkOrderPageParam">
+        select cwo.id as workOrderId,cwo.type,cwo.target,cwo.status,cwo.apply_reason as applyReason,
+        cwo.audit_opinion as auditOpinion,cu.real_name as applyUser,cu.id as applyUserId,cu.user_name as userName,
+        DATE_FORMAT(cwo.create_time,'%Y-%m-%d %H:%i:%S') as applyTime,
+        DATE_FORMAT(cwo.audit_time,'%Y-%m-%d %H:%i:%S') as auditTime
+        -- ,co.organization_name as organizationName
+        from cloud_work_order cwo
+        left join cloud_user cu on cwo.user_id=cu.id
+        -- left join cloud_organization co on cu.organization_id=co.id
+        where cwo.delete_flag=0
+        <if test="searchOrderStatus!= @com.hnkylin.cloud.core.enums.WorkOrderStatus@ALL">
+            and cwo.status=#{searchOrderStatus}
+        </if>
+        <if test="searchOrderType!= @com.hnkylin.cloud.core.enums.WorkOrderType@ALL">
+            and cwo.type=#{searchOrderType}
+        </if>
+        <!--        <if test="organizationId >0 ">-->
+        <!--            and cu.organization_id=#{organizationId}-->
+        <!--        </if>-->
+        <if test="searchKey != null and searchKey != ''">
+            and (cu.user_name like concat('%',#{searchKey},'%') or cu.real_name like concat('%',#{searchKey},'%'))
+        </if>
+        <if test="visibleUserIdList != null and visibleUserIdList.size() > 0">
+            and cwo.user_id in
+            <foreach collection="visibleUserIdList" item="userId" separator="," open="(" close=")">
+                #{userId}
+            </foreach>
+        </if>
+        <if test="startTime != null and startTime != ''">
+            <![CDATA[ and DATE_FORMAT(cwo.create_time, '%Y-%m-%d') >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and DATE_FORMAT(cwo.create_time, '%Y-%m-%d') <= #{endTime} ]]>
+        </if>
+        order by cwo.id desc
+    </select>
+
+
+</mapper>

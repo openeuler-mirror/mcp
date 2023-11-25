@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.VdcMapper">
+
+
+    <select id="getNotBindVdcListByParentId" resultType="com.hnkylin.cloud.manage.entity.resp.vdc.VdcDetailRespDto">
+        SELECT vdc.id as vdcId, vdc.vdc_name as vdcName
+        FROM cloud_vdc vdc
+        WHERE vdc.parent_id=#{parentVdcId} AND vdc.delete_flag=false
+        AND  NOT EXISTS (SELECT *  FROM cloud_org_vdc org_vdc WHERE org_vdc.delete_flag=FALSE AND org_vdc.vdc_id=vdc.id )
+    </select>
+
+
+</mapper>
