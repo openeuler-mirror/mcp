@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.PermissionMapper">
+
+
+    <select id="listPermissionByRoleId" resultType="com.hnkylin.cloud.core.domain.CloudPermissionDo">
+       select crp.permission_id as id,cp.name as name,cp.icon as icon,cp.route_key as routeKey,parent_id as parentId
+        from cloud_role_permission crp
+        left join cloud_permission cp on crp.permission_id=cp.id
+        where crp.role_id=#{roleId} and crp.delete_flag=false
+    </select>
+
+
+    <select id="rolePermissionByRoleId" resultType="com.hnkylin.cloud.manage.entity.resp.user.UserPermissionDto">
+       select
+        crp.permission_id as permissionId,
+        cp.icon as icon,
+        cp.route_key as routeKey,
+        cp.parent_id as parentId,
+        parent_cp.icon as parentIcon,
+        parent_cp.route_key as parentRouteKey
+        from cloud_permission cp
+        left join   cloud_role_permission crp on crp.permission_id =cp.id
+        left join  cloud_permission parent_cp on cp.parent_id=parent_cp.id
+        where crp.role_id=#{roleId} and crp.delete_flag=false
+    </select>
+
+
+</mapper>

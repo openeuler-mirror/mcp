@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.NetworkMapper">
+
+
+    <select id="networkListByVdcId" resultType="com.hnkylin.cloud.manage.entity.resp.network.NetworkDetailDto">
+       select cnc.id as networkId,cnc.cluster_id as clusterId, cc.name as clusterName,cnc.network_name as networkName,
+        cnc.interface_type as interfaceType, cnc.address_pool_id as addressPoolId,
+        cnc.address_pool as addressPool, cnc.virtual_switch as virtualSwitch,
+        cnc.model_type as modelType,cnc.port_group as portGroup,cnc.port_group_uuid as portGroupUuid,
+        cnc.security_policy as securityPolicy,cnc.virtual_firewall_id as virtualFirewallId,
+        cnc.virtual_firewall_name as virtualFirewallName,
+        cnc.security_group as securityGroup,cnc.security_group_uuid as securityGroupUuid
+       from cloud_network_config cnc
+       LEFT JOIN cloud_cluster cc on cnc.cluster_id=cc.id
+       where cnc.delete_flag=false and cnc.vdc_id=#{vdcId}
+    </select>
+
+
+</mapper>

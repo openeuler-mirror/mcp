@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnkylin.cloud.manage.mapper.UserMapper">
+
+
+    <select id="pageUser" resultType="com.hnkylin.cloud.manage.entity.resp.user.PageUserRespDto">
+        SELECT
+        cu.id AS userId,
+        cu.user_name AS userName,
+        cu.real_name AS realName,
+        cu.mobile AS mobile,
+        cu.status AS status,
+        cu.default_user AS defaultUser,
+        cr.role_name AS roleName,
+        cr.role_type AS roleType,
+        DATE_FORMAT( cu.create_time, '%Y-%m-%d %H:%i:%S' ) AS createTime
+        FROM
+        cloud_user cu,
+        cloud_user_role cur,
+        cloud_role cr
+        WHERE
+        cu.delete_flag =FALSE
+        AND cur.role_id = cr.id
+        AND cur.user_id = cu.id
+        <if test="orgIdList != null and orgIdList.size() > 0">
+            and cu.organization_id in
+            <foreach collection="orgIdList" item="orgId" separator="," open="(" close=")">
+                #{orgId}
+            </foreach>
+        </if>
+        <if test="searchKey != null and searchKey != ''">
+            and (cu.user_name like concat('%',#{searchKey},'%') or cu.real_name like concat('%',#{searchKey},'%'))
+        </if>
+    </select>
+
+    <select id="getUserCountByRoleType" resultType="java.lang.Integer">
+        select count(cur.id)
+        from cloud_user_role cur
+        left join cloud_role cr on cur.role_id=cr.id
+        where cur.delete_flag=false and cr.delete_flag=false and cr.role_type=#{roleType}
+        <if test="orgIdList != null and orgIdList.size() > 0">
+            AND cur.user_id in (select id from cloud_user where organization_id in
+            <foreach collection="orgIdList" item="orgId" separator="," open="(" close=")">
+                #{orgId}
+            </foreach>
+            )
+        </if>
+    </select>
+
+
+</mapper>

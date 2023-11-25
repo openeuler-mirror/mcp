@@ -1,0 +1,13 @@
+server:
+  ssl:
+    key-store: classpath:keystore.p12
+    key-password: 111111
+    key-store-type: PKCS12
+    enabled-protocols: TLSv1,TLSv1.1,TLSv1.2
+    ciphers: TLS_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_DH_DSS_WITH_AES_128_CBC_SHA, TLS_DH_DSS_WITH_AES_256_CBC_SHA, TLS_DH_RSA_WITH_AES_128_CBC_SHA, TLS_DH_RSA_WITH_AES_256_CBC_SHA
+    client-auth:
+    enabled: true
+    protocol: TLS
+    key-store-password: 111111
+mc-config:
+  mcLogoLocalFilePath: /soft/mcServerVmLogo/

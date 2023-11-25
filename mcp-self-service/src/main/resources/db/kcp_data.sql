@@ -1,0 +1,6 @@
+INSERT INTO kcp.cloud_organization (id, organization_name, parent_id, remark, create_by, create_time, update_by, update_time, delete_flag, delete_time, delete_by) VALUES (1, '麒麟信安', 0, null, 0, '2021-06-17 16:04:35', 0, null, false, null, 0);
+INSERT INTO kcp.cloud_organization (id, organization_name, parent_id, remark, create_by, create_time, update_by, update_time, delete_flag, delete_time, delete_by) VALUES (2, '陕西麒麟', 1, null, 0, '2021-06-17 16:04:57', 0, null, false, null, 0);
+INSERT INTO kcp.cloud_organization (id, organization_name, parent_id, remark, create_by, create_time, update_by, update_time, delete_flag, delete_time, delete_by) VALUES (3, '研发一部', 1, null, 0, '2021-06-17 16:05:37', 0, null, false, null, 0);
+
+INSERT INTO kcp.cloud_user (id, user_name, real_name, password, mobile, remark, organization_id, user_type, status,
+create_by, create_time, update_by, update_time, delete_flag, delete_time, delete_by) VALUES (1, 'admin', '系统管理员', '25f9e794323b453885f5181f1b624d0b', '13000000000', '系统管理员', 1, 1, 1, 0, '2021-08-20 10:05:21', 0, null, false, null, 0);
