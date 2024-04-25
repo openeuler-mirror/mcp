@@ -10,8 +10,11 @@ import com.hnkylin.cloud.core.common.servervm.ServerVmMonitorInfoRespDto;
 import com.hnkylin.cloud.core.enums.McStartVmErrorCode;
 import com.hnkylin.cloud.manage.entity.LoginUserVo;
 import com.hnkylin.cloud.manage.entity.mc.resp.*;
+import com.hnkylin.cloud.manage.entity.req.servervm.QueryTransferOrgParams;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmOperateLogPageParam;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmPageParam;
+import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmTransferParam;
+import com.hnkylin.cloud.manage.entity.resp.org.ParentOrgRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.PageServerVmRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.ServerVmZoneOrgTreeRespDto;
 import org.springframework.http.ResponseEntity;
@@ -169,5 +172,25 @@ public interface ServerVmService {
     PageData<McServerVmLogResp> serverVmOperateLog(ServerVmOperateLogPageParam serverVmOperateLogPageParam,
                                                    LoginUserVo loginUserVo);
 
+
+    /**
+     * 云服务器转移
+     *
+     * @param serverVmTransferParam
+     * @param loginUserVo
+     */
+    void serverVmTransfer(ServerVmTransferParam serverVmTransferParam, LoginUserVo loginUserVo);
+
+
+
+
+    /**
+     * 云服务器转移跨组织可转移组
+     *
+     * @param queryTransferOrgParams
+     * @param loginUserVo
+     * @return
+     */
+    List<ParentOrgRespDto> transferCanSelectOrg(QueryTransferOrgParams queryTransferOrgParams, LoginUserVo loginUserVo);
 
 }

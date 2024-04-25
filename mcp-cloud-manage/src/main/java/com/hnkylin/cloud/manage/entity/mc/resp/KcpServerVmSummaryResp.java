@@ -29,5 +29,6 @@ public class KcpServerVmSummaryResp {
 
     private BigDecimal diskPercent;
 
+    private String plateformType;
 
 }

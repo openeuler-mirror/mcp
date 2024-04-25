@@ -24,5 +24,7 @@ public interface KylinHttpResponseServerVmConstants {
 
     String BATCH_OPERATE_ERR = "批量操作失败";
 
+    String TRANSFER_ERR = "转移失败，超出转移用户所在组资源限制";
+
 
 }
