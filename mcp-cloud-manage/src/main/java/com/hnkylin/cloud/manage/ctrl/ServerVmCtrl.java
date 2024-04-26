@@ -14,8 +14,11 @@ import com.hnkylin.cloud.manage.constant.KylinHttpResponseServerVmConstants;
 import com.hnkylin.cloud.manage.entity.LoginUserVo;
 import com.hnkylin.cloud.manage.entity.mc.resp.*;
 import com.hnkylin.cloud.manage.entity.req.cluster.BaseClusterParam;
+import com.hnkylin.cloud.manage.entity.req.servervm.QueryTransferOrgParams;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmOperateLogPageParam;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmPageParam;
+import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmTransferParam;
+import com.hnkylin.cloud.manage.entity.resp.org.ParentOrgRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.PageServerVmRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.ServerVmZoneOrgTreeRespDto;
 import com.hnkylin.cloud.manage.service.ServerVmService;
@@ -259,5 +262,23 @@ public class ServerVmCtrl {
         return BaseResult.success(serverVmService.serverVmOperateLog(serverVmOperateLogPageParam, loginUserVo));
 
     }
+
+    @PostMapping("/transferCanSelectOrg")
+    public BaseResult<List<ParentOrgRespDto>> transferCanSelectOrg(@RequestBody QueryTransferOrgParams queryTransferOrgParams,
+                                                                   @LoginUser LoginUserVo loginUserVo) {
+        return BaseResult.success(serverVmService.transferCanSelectOrg(queryTransferOrgParams, loginUserVo));
+
+    }
+
+    @PostMapping("/serverVmTransfer")
+    @ParamCheck
+    public BaseResult<String> serverVmTransfer(@ModelCheck(notNull = true) @RequestBody
+                                                           ServerVmTransferParam serverVmTransferParam,
+                                               @LoginUser LoginUserVo loginUserVo) {
+        serverVmService.serverVmTransfer(serverVmTransferParam, loginUserVo);
+        return BaseResult.success(null);
+
+    }
+
 
 }

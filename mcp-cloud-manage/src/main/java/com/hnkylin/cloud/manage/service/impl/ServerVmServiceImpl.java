@@ -9,9 +9,7 @@ import com.hnkylin.cloud.core.common.*;
 import com.hnkylin.cloud.core.common.servervm.*;
 import com.hnkylin.cloud.core.config.exception.KylinException;
 import com.hnkylin.cloud.core.domain.*;
-import com.hnkylin.cloud.core.enums.McServerVmStatus;
-import com.hnkylin.cloud.core.enums.McStartVmErrorCode;
-import com.hnkylin.cloud.core.enums.RoleType;
+import com.hnkylin.cloud.core.enums.*;
 import com.hnkylin.cloud.core.service.*;
 import com.hnkylin.cloud.manage.config.MCConfigProperties;
 import com.hnkylin.cloud.manage.constant.KylinCloudManageConstants;
@@ -19,10 +17,15 @@ import com.hnkylin.cloud.manage.constant.KylinHttpResponseServerVmConstants;
 import com.hnkylin.cloud.manage.entity.LoginUserVo;
 import com.hnkylin.cloud.manage.entity.mc.req.ServerVmOperateLogReq;
 import com.hnkylin.cloud.manage.entity.mc.resp.*;
+import com.hnkylin.cloud.manage.entity.req.servervm.QueryTransferOrgParams;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmOperateLogPageParam;
 import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmPageParam;
+import com.hnkylin.cloud.manage.entity.req.servervm.ServerVmTransferParam;
+import com.hnkylin.cloud.manage.entity.resp.org.ParentOrgRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.PageServerVmRespDto;
 import com.hnkylin.cloud.manage.entity.resp.serverVm.ServerVmZoneOrgTreeRespDto;
+import com.hnkylin.cloud.manage.entity.resp.vdc.VdcArchitectureUsedResourceDto;
+import com.hnkylin.cloud.manage.entity.resp.vdc.VdcUsedResourceDto;
 import com.hnkylin.cloud.manage.entity.resp.zone.ZoneInfoDto;
 import com.hnkylin.cloud.manage.enums.ZoneOrgUserType;
 import com.hnkylin.cloud.manage.service.*;
@@ -96,6 +99,10 @@ public class ServerVmServiceImpl implements ServerVmService {
 
     @Resource
     private RoleService roleService;
+
+
+    @Resource
+    private CloudZoneClusterService cloudZoneClusterService;
 
     @Override
     public List<ServerVmZoneOrgTreeRespDto> serverVmZoneTree(Integer clusterId, LoginUserVo loginUserVo) {
@@ -1080,6 +1087,134 @@ public class ServerVmServiceImpl implements ServerVmService {
             baos.close();
         }
         return bytes;
+    }
+
+    @Override
+    public List<ParentOrgRespDto> transferCanSelectOrg(QueryTransferOrgParams queryTransferOrgParams,
+                                                       LoginUserVo loginUserVo) {
+
+        CloudZoneClusterDo zoneClusterDo = cloudZoneClusterService.getByClusterId(queryTransferOrgParams.getClusterId());
+
+        return orgService.transferCanSelectOrg(loginUserVo, zoneClusterDo.getZoneId());
+    }
+    @Override
+    public void serverVmTransfer(ServerVmTransferParam serverVmTransferParam, LoginUserVo loginUserVo) {
+
+
+
+        CloudUserDo transferToUser = cloudUserService.getById(serverVmTransferParam.getTransferToUserId());
+        //调用mc接口，将对应云服务器移动到自服务分组下
+        ServerVmMoveToPortalGroupParam serverVmMoveToPortalGroupParam = new ServerVmMoveToPortalGroupParam();
+        serverVmMoveToPortalGroupParam.setMachineUUid(serverVmTransferParam.getMachineUUid());
+        serverVmMoveToPortalGroupParam.setMoveToUser(transferToUser.getUserName());
+
+        try {
+            mcHttpService.noDataCommonMcRequest(serverVmTransferParam.getClusterId(),
+                    serverVmMoveToPortalGroupParam,
+                    mcConfigProperties.getMoveMachineToPortalGroup(), loginUserVo.getUserName(), 0);
+            transferMachine(serverVmMoveToPortalGroupParam.getMachineUUid(),
+                    serverVmTransferParam.getTransferToUserId(), serverVmTransferParam.getClusterId(), true,
+                    loginUserVo);
+        } catch (Exception e) {
+            throw new KylinException(KylinHttpResponseServerVmConstants.OPERATE_ERR);
+        }
+    }
+
+    /**
+     * 指派云服务器给自服务用户
+     *
+     * @param machineUuid
+     * @param userId
+     * @param clusterId
+     * @param verifyFlag
+     * @param loginUserVo
+     */
+    private void transferMachine(String machineUuid, Integer userId, Integer clusterId,
+                                 Boolean verifyFlag,
+                                 LoginUserVo loginUserVo) {
+
+        CloudUserMachineDo cloudUserMachineDo =
+                cloudUserMachineService.getUserMachineDoByUuid(machineUuid);
+        if (Objects.nonNull(cloudUserMachineDo)) {
+            //云服务器原属于用户
+            CloudUserDo oldUserDo = cloudUserService.getById(cloudUserMachineDo.getUserId());
+            CloudUserDo newUser = cloudUserService.getById(userId);
+            if (verifyFlag) {
+                //判断两个是否是同一个组织,如果是 则直接转移，如果不是则需要校验新用户所在组的资源池剩余额度是否允许
+                if (!Objects.equals(oldUserDo.getOrganizationId(), newUser.getOrganizationId())) {
+                    transferVerify(userId, clusterId, machineUuid, loginUserVo);
+                }
+            }
+
+            cloudUserMachineDo.setUserId(userId);
+            cloudUserMachineDo.setUpdateTime(new Date());
+            cloudUserMachineDo.setUpdateBy(loginUserVo.getUserId());
+            cloudUserMachineService.updateById(cloudUserMachineDo);
+        } else {
+            if (verifyFlag) {
+                transferVerify(userId, clusterId, machineUuid, loginUserVo);
+            }
+            //说明是非自服务用户云服务器转移给自服务用户   采用到期告警策略。默认半年使用期
+            Date afterMonthDate = DateUtils.getMonthAfter(new Date(), 6);
+            cloudUserMachineDo = new CloudUserMachineDo();
+            cloudUserMachineDo.setDeadlineFlag(Boolean.FALSE);
+            cloudUserMachineDo.setDeadlineTime(afterMonthDate);
+            cloudUserMachineDo.setUserId(userId);
+            cloudUserMachineDo.setMachineUuid(machineUuid);
+            cloudUserMachineDo.setCreateBy(loginUserVo.getUserId());
+            cloudUserMachineDo.setDeadlineType(ServerVmDeadlineType.POWER_OFF);
+            cloudUserMachineDo.setCreateTime(new Date());
+            cloudUserMachineDo.setClusterId(clusterId);
+            cloudUserMachineService.save(cloudUserMachineDo);
+        }
+    }
+
+    /**
+     * 云服务器转移校验
+     *
+     * @param loginUserVo
+     */
+    private void transferVerify(Integer userId, Integer clusterId, String machineUuid, LoginUserVo loginUserVo) {
+        //1:获取云服务器详情(架构，cpu，内存，存储)
+        ServerVmBaseParam serverVmBaseParam = new ServerVmBaseParam();
+        serverVmBaseParam.setServerVmUuid(machineUuid);
+        KcpServerVmSummaryResp kcpServerVmSummaryResp = serverVmSummary(serverVmBaseParam, loginUserVo);
+        if (Objects.nonNull(kcpServerVmSummaryResp)) {
+
+
+            //根据申请用户获取用户对应的组织
+            CloudOrganizationDo orgDo =
+                    cloudOrganizationService.getById(cloudUserService.getById(userId).getOrganizationId());
+            //获取组织绑定的VDC
+            CloudVdcDo vdcDo = vdcService.getVdcByOrgId(orgDo.getId());
+            //获取VDC资源使用情况
+            VdcUsedResourceDto vdcResourceDto = vdcService.getVdcResourceInfo(vdcDo.getId(), loginUserVo);
+
+            //VDC-各架构资源使用情况
+            List<VdcArchitectureUsedResourceDto> vdcArchitectureUsedResourceList =
+                    vdcResourceDto.getVdcArchitectureUsedResourceList();
+
+
+            ArchitectureType architectureType =
+                    KcpCommonUtil.changeToKcpArchitectureType(kcpServerVmSummaryResp.getPlateformType());
+            VdcArchitectureUsedResourceDto architectureUsedResource =
+                    vdcArchitectureUsedResourceList.stream().filter(item -> Objects.equals(item.getArchitectureType(),
+                            architectureType))
+                            .findFirst().orElse(null);
+
+
+            Integer serverVmCpu = kcpServerVmSummaryResp.getCpuCount().intValue();
+            Integer serverVmMem = kcpServerVmSummaryResp.getMemoryTotal().intValue();
+            Integer serverVmDisk = kcpServerVmSummaryResp.getDiskTotal().intValue();
+            //校验vdc-架构-cpu
+            if ((Objects.isNull(architectureUsedResource) || serverVmCpu > architectureUsedResource.getSurplusCpu())
+                    || (Objects.isNull(architectureUsedResource) || serverVmMem > architectureUsedResource.getSurplusMem())
+                    || (serverVmDisk > vdcResourceDto.getSurplusStorage())) {
+                throw new KylinException(KylinHttpResponseServerVmConstants.TRANSFER_ERR);
+            }
+        } else {
+            throw new KylinException(KylinHttpResponseServerVmConstants.OPERATE_ERR);
+        }
     }
 
 }

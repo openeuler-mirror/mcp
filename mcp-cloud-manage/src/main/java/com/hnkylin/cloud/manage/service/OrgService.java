@@ -111,5 +111,14 @@ public interface OrgService {
      */
     OrgSummaryRespDto orgSummary(BaseOrgParam baseOrgParam, LoginUserVo loginUserVo);
 
+    /**
+     * 云服务器转移可获取的组织列表
+     *
+     * @param loginUserVo
+     * @param zoneId      可用区ID
+     * @return
+     */
+    List<ParentOrgRespDto> transferCanSelectOrg(LoginUserVo loginUserVo, Integer zoneId);
+
 
 }

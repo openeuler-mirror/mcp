@@ -161,4 +161,8 @@ public class MCConfigProperties {
     //已读告警
     private String ignoreNotificationsUrl;
 
+    //将云服务器移动到自服务分组下
+    private String moveMachineToPortalGroup;
+
+
 }

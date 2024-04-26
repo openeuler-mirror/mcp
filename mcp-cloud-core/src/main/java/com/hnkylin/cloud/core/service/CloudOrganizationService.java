@@ -35,5 +35,13 @@ public interface CloudOrganizationService extends IService<CloudOrganizationDo> 
      */
     CloudOrganizationDo getDefaultTopOrg();
 
+    /**
+     * 根据vdc集合获取组织列表
+     *
+     * @param vdcList
+     * @return
+     */
+    List<CloudOrganizationDo> getOrgListByVdcList(List<Integer> vdcList);
+
 
 }

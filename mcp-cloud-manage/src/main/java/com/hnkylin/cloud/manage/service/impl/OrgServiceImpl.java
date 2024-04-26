@@ -721,4 +721,53 @@ public class OrgServiceImpl implements OrgService {
 
         return orgSummary;
     }
+
+
+    @Override
+    public List<ParentOrgRespDto> transferCanSelectOrg(LoginUserVo loginUserVo, Integer zoneId) {
+
+        //获取可用区绑定的VDC列表
+        List<CloudVdcDo> vdcList = cloudVdcService.vdcListByZone(zoneId);
+
+        if (!vdcList.isEmpty()) {
+            //获取绑定可用区的组织列表
+            List<CloudOrganizationDo> bindZoneOrgList =
+                    cloudOrganizationService.getOrgListByVdcList(vdcList.stream().map(CloudVdcDo::getId).collect(Collectors.toList()));
+            List<Integer> bindZoneOrgIdList =
+                    bindZoneOrgList.stream().map(CloudOrganizationDo::getId).collect(Collectors.toList());
+            //获取登录用户组织
+            CloudOrganizationDo loginUserOrg = getByUserId(loginUserVo.getUserId());
+            List<CloudOrganizationDo> childOrgList = cloudOrganizationService.listChildOrgByOrgId(loginUserOrg.getId());
+
+
+            //数据过滤，获取绑定了可用区的登录用户可见的组织列表
+            List<CloudOrganizationDo> bindZoneVisibleOrgList =
+                    childOrgList.stream().filter(item -> bindZoneOrgIdList.contains(item.getId())).collect(Collectors.toList());
+            if (bindZoneVisibleOrgList.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<ParentOrgRespDto> parentOrgList = new ArrayList<>();
+            //用户是否是平台管理用户
+            boolean platformUser = userService.judgeIfPlatformUser(loginUserVo.getUserId());
+            if (platformUser) {
+                CloudOrganizationDo topOrg = cloudOrganizationService.getDefaultTopOrg();
+                for (CloudOrganizationDo orgDo : bindZoneVisibleOrgList) {
+                    if (Objects.equals(orgDo.getParentId(), topOrg.getId())) {
+                        parentOrgList.add(formatParentOrgDto(orgDo, bindZoneVisibleOrgList, null));
+                    }
+                }
+            } else {
+                for (CloudOrganizationDo orgDo : bindZoneVisibleOrgList) {
+                    if (Objects.equals(orgDo.getId(), loginUserOrg.getId())) {
+                        parentOrgList.add(formatParentOrgDto(orgDo, bindZoneVisibleOrgList, null));
+                    }
+                }
+            }
+
+            return parentOrgList;
+
+        }
+        return new ArrayList<>();
+    }
 }
