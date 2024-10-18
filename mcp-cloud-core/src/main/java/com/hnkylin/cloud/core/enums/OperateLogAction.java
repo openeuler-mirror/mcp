@@ -49,6 +49,8 @@ public enum OperateLogAction {
     SERVERVM_CREATESNAPSHOT("创建快照", OperateLogType.SERVERVM),
     SERVERVM_APPLYSNAPSHOT("恢复快照", OperateLogType.SERVERVM),
     SERVERVM_DELETESNAPSHOT("删除快照", OperateLogType.SERVERVM),
+    KCP_HA_ADD_SLAVE("添加备KCP", OperateLogType.KCP_HA),
+    KCP_HA_DELETE_SLAVE("删除备KCP", OperateLogType.KCP_HA),
 ;
 
 

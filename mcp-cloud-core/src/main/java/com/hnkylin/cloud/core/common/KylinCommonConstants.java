@@ -46,4 +46,17 @@ public interface KylinCommonConstants {
     int MC_MASTER_PORT = 8443;
 
 
+    String KCP_OPEN_API_SECRET = "kylinsec@kcp";
+
+    String KCP_OPEN_API_INVOKE_TIME = "INVOKE_TIME";
+
+    String KCP_OPEN_API_TOKEN = "KCP_OPEN_API_TOKEN";
+
+    String PERCENT_100 = "100";
+
+    String PERCENT_0 = "0";
+
+    String PERCENT_10 = "10";
+
+    String KCP_PORT = ":5001";
 }

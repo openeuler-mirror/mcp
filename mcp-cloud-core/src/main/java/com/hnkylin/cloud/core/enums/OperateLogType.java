@@ -10,6 +10,7 @@ public enum OperateLogType {
     ROLE(6, "角色"),
     SERVERVM(8, "云服务器"),
     ALARM(9, "告警"),
+    KCP_HA(12, "主备KCP"),
     ;
 
 

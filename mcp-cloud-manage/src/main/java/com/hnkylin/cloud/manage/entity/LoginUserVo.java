@@ -11,4 +11,6 @@ public class LoginUserVo {
 
     private String token;
 
+    private String clientIp;
+
 }
