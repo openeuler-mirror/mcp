@@ -3,7 +3,9 @@ package com.hnkylin.cloud.core.common;
 import com.hnkylin.cloud.core.enums.ArchitectureType;
 import com.hnkylin.cloud.core.enums.McArchitectureType;
 
+import java.io.FileInputStream;
 import java.util.Objects;
+import java.util.Properties;
 
 public class KcpCommonUtil {
     public static ArchitectureType changeToKcpArchitectureType(String plateformType) {
@@ -24,6 +26,22 @@ public class KcpCommonUtil {
             return ArchitectureType.SW64;
         }
         return ArchitectureType.X86_64;
+    }
+    /**
+     * 获取主备配置文件中值
+     *
+     * @param key
+     * @return
+     */
+    public static String getHaConfigInfo(String filePath, String key) {
+        String value = null;
+        try {
+            Properties p = new Properties();
+            p.load(new FileInputStream(filePath));
+            value = p.getProperty(key);
+        } catch (Exception e) {
+        }
+        return value;
     }
 }
 
