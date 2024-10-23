@@ -30,9 +30,9 @@ public class AESUtil {
     }
 
     public static byte[] revealHex(String codedText) throws Exception {
-        byte[] encypted = new Hex().decode(codedText.getBytes("UTF-8"));
+        byte[] encrypted = new Hex().decode(codedText.getBytes("UTF-8"));
         AES_CIPHER.init(Cipher.DECRYPT_MODE, AES_KEY);
-        byte[] decrypted = AES_CIPHER.doFinal(encypted);
+        byte[] decrypted = AES_CIPHER.doFinal(encrypted);
         return decrypted;
     }
 
@@ -57,9 +57,9 @@ public class AESUtil {
      * @throws Exception
      */
     public static String reveal(String codedText) throws Exception {
-        byte[] encypted = new Hex().decode(codedText.getBytes("UTF-8"));
+        byte[] encrypted = new Hex().decode(codedText.getBytes("UTF-8"));
         AES_CIPHER.init(Cipher.DECRYPT_MODE, AES_KEY);
-        byte[] decrypted = AES_CIPHER.doFinal(encypted);
+        byte[] decrypted = AES_CIPHER.doFinal(encrypted);
         return new String(decrypted);
     }
 
