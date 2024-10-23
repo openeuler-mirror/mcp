@@ -68,7 +68,7 @@ public class McNodeService {
     }
 
     /**
-     * 设置mc主节点额url到缓存中
+     * 设置mc主节点的url到缓存中
      */
     public void setMcLeaderUrlToCache(String mcLeaderUrl, Integer clusterId) {
         mcLeaderNodeCacheService.vSet(SelfServiceRedisConstant.MC_LEADER_URL_KEY + clusterId, mcLeaderUrl);

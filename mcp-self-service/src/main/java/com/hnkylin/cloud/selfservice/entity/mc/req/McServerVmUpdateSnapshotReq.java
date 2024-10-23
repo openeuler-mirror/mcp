@@ -18,6 +18,6 @@ public class McServerVmUpdateSnapshotReq {
 
     private String description;
 
-    @FieldCheck(notNull = true, notNullMessage = "快照名称能为空")
+    @FieldCheck(notNull = true, notNullMessage = "快照名称不能为空")
     private String snapName;
 }
