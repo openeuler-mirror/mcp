@@ -879,14 +879,14 @@ public class ClusterServiceImpl implements ClusterService {
     @Override
     public List<ClusterDto> zoneClusterList(Integer zoneId) {
         List<CloudClusterDo> clusterDoList = cloudClusterService.listClusterBYZoneId(zoneId);
-        List<ClusterDto> zoneCusterLIst = new ArrayList<>();
+        List<ClusterDto> zoneCusterList = new ArrayList<>();
         clusterDoList.forEach(item -> {
             ClusterDto clusterDto = new ClusterDto();
             clusterDto.setClusterId(item.getId());
             clusterDto.setClusterName(item.getName());
-            zoneCusterLIst.add(clusterDto);
+            zoneCusterList.add(clusterDto);
         });
-        return zoneCusterLIst;
+        return zoneCusterList;
     }
 
 
