@@ -36,8 +36,8 @@ public class CloudVdcServiceImpl extends ServiceImpl<CloudVdcMapper, CloudVdcDo>
 
     @Override
     public List<Integer> getChildVdcIdList(Integer parentVdcId) {
-        List<CloudVdcDo> childVdcLIst = getChildVdcList(parentVdcId);
-        return childVdcLIst.stream().map(CloudVdcDo::getId).collect(Collectors.toList());
+        List<CloudVdcDo> childVdcList = getChildVdcList(parentVdcId);
+        return childVdcList.stream().map(CloudVdcDo::getId).collect(Collectors.toList());
     }
 
     @Override
