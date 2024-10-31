@@ -6,9 +6,8 @@ server:
     uri-encoding: UTF-8
     # tomcat最大线程数，默认为200
     # Tomcat启动初始化的线程数，默认值25
-    threads:
-      max: 500
-      min-spare: 30
+    max-threads: 500
+    min-spare-threads: 30
   port: 8081
 logging:
   config: classpath:logback.xml
