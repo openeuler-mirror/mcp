@@ -49,7 +49,7 @@ public class PermissionServiceImpl implements PermissionService {
             if (Objects.equals(permissionDo.getParentId(), KylinCommonConstants.TOP_PARENT_ID)) {
                 PermissionTreeDto permissionTreeDto = createCustomRolePermissionTreeDto(permissionDo,
                         customPlatformRoleMaxPermissionList);
-                if (Objects.nonNull(permissionDo)) {
+                if (Objects.nonNull(permissionTreeDto)) {
                     permissionTreeDtoList.add(permissionTreeDto);
                 }
 
