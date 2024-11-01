@@ -102,12 +102,12 @@ public abstract class RedisServiceImpl {
 
 
     public Object executeLuaScript(RedisScript redisScript, List<String> keys, Object... argvs) {
-        List<String> newKyes = new ArrayList<>(keys.size());
+        List<String> newKeys = new ArrayList<>(keys.size());
         keys.forEach(key -> {
-            newKyes.add(fixKey(key));
+            newKeys.add(fixKey(key));
         });
 
-        return valueOps.getOperations().execute(redisScript, newKyes, argvs);
+        return valueOps.getOperations().execute(redisScript, newKeys, argvs);
     }
 
 
